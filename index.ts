@@ -1,60 +1,95 @@
-// Narrowing 문법 / 유니온타입등 정해진 타입이 아닌경우 케이스를 명확히 해줘야 함!(타입오브를 활용하는 방법)
-// Narrowing 은 instanceof, in등 타입을 확정지을 수 있으면 가능하다.
-// if를 썼으면 else if, else 등을 통해서 타입을 무조건 확정지어야 오류가 안난다.
-const fn = (x: number | string) => {
-    if(typeof x === 'string') {
-        return x + '1';
-    } else {
-        return x + 1;
-    }
-}
-fn('d');
+// 타입이 너무 길 경우 커스텀 타입(타입변수)을 활용하자(type alias)
+// 타입 변수는 대문자로 시작하는게 관습
+// 뒤에 type 을 붙여주는게 관습
+type AnimalType = string | number | undefined;
+let animal: AnimalType = 13413
+console.log(animal);
 
-// assertion 문법 / 유니온타입인 경우에 한가지 타입으로 덮어씌워주는 기능임
-// 무슨 타입이 들어올지 확실할때만 사용.
-// x에 '134'이 들어가도 오류를 잡아주지 못함.
-// 앵간하면 지양하자.(디버깅용, 비상용만 사용)
-const fn2 = (x: number | string): number[] => {
-    const array: number[] = [];
-    array.push(x as number);
-    return array;
+type AnimalType2 = {
+    name: string,
+    age: number
 }
-fn2(3);
+let animal2: AnimalType2 = {
+    name: '하마',
+    age: 3
+}
+console.log(animal2)
 
-// (숙제1) 숫자여러개를 array 자료에 저장해놨는데
-// 가끔 '4', '5' 이런 식의 문자타입의 숫자가 발견되고 있습니다.
-// 이걸 클리닝해주는 함수가 필요합니다.
-// 클리닝함수( ['1', 2, '3'] ) 이렇게 숫자와 문자가 섞인 array를 입력하면
-// [1,2,3] 이렇게 숫자로 깔끔하게 변환되어 나오는 클리닝함수를 만들어오고 타입지정까지 확실히 해보십시오.
-const q1 = (x: (number | string)[]): number[] => {
-    return x.map(t => Number(t));
+// object와 array의 값을 수정할 수 없도록 막아주는 readonly 속성
+type FriendType = {
+    readonly name: string
 }
-console.log(q1([1, '2', '3', '4', 6]))
+const friend: FriendType = {
+    name: '망할놈'
+}
+console.log(friend);
 
-// (숙제2) 다음과 같은 함수를 만들어보십시오.
-// let 철수쌤 = { subject : 'math' }
-// let 영희쌤 = { subject : ['science', 'english'] }
-// let 민수쌤 = { subject : ['science', 'art', 'korean'] }
-// 지금 여러 변수에 선생님이 가르치고 있는 과목이 저장이 되어있습니다.
-// 과목 1개만 가르치는 쌤들은 문자 하나로 과목이 저장이 되어있고
-// 과목 2개 이상 가르치는 쌤들은 array 자료로 과목들이 저장되어있습니다.
-// 철수쌤같은 선생님 object 자료를 집어넣으면
-// 그 선생님이 가르치고 있는 과목중 맨 뒤의 1개를 return 해주는 함수를 만들어봅시다.
-// 그리고 타입지정도 엄격하게 해보도록 합시다.
-//
-// (동작예시)
-// 만들함수( { subject : 'math' } )  //이 경우 'math'를 return
-// 만들함수( { subject : ['science', 'art', 'korean'] } ) //이 경우 'korean'을 return
-// 만들함수( { hello : 'hi' } )  //이 경우 타입에러 나면 됩니다
-const q2 = (x: {subject: (string | string[])}): string => {
-    let result: string;
-    let target = x.subject;
-    if(typeof target === 'string') {
-        result = target;
-    } else {
-        result = target[target.length - 1];
-    }
-    return result;
+// 타입은 여러개를 합쳐서 만들 수 있음
+// 단, 재정의는 불가능함
+// 여러개의 타입을 | 로 or 조건으로 묶어주거나 object 같은 타입은 & 기호로 extend 해주기
+type NameType = string;
+type AgeType = number;
+type PersonType = NameType | AgeType;
+let person: PersonType = 13;
+console.log(person);
+
+type PositionXType = {x: number};
+type PositionYType = {y: number};
+type NewType = PositionXType & PositionYType;   // object 타입들의 extend
+let position: NewType = {
+    x: 134,
+    y: 23
 }
-console.log(q2({ subject : 'math' }));
-console.log(q2({ subject : ['science', 'art', 'korean'] }));
+console.log(position);
+
+// (숙제1) object 타입을 정의한 type alias 두개를 & 기호로 합칠 때 중복된 속성이 있으면 어떻게 될까요?
+type Q1_1 = {q1_1: number, q1_10: number};
+type Q1_2 = {q1_2: number, q1_10: number};
+type Q1_3 = Q1_1 & Q1_2;
+let q1: Q1_3 = {
+    q1_1: 1,
+    q1_2: 2,
+    q1_10: 10
+};
+console.log(q1);
+
+// (숙제2) 다음 조건을 만족하는 타입을 만들어봅시다.
+// 1. 이 타입은 object 자료형이어야합니다.
+// 2. 이 타입은 color 라는 속성을 가질 수도 있으며 항상 문자가 들어와야합니다.
+// 3. 이 타입은 size 라는 속성이 있어야하며 항상 숫자가 들어와야합니다.
+// 4. 이 타입은 position 이라는 변경불가능한 속성이 있어야하며 항상 숫자가 담긴 array 자료가 들어와야합니다.
+type Q2 = {
+    color?: string,
+    size: number,
+    readonly position: number[]
+}
+const q2: Q2 = {
+    size: 10,
+    position: [1, 3, 5]
+}
+console.log(q2);
+
+// (숙제3) 다음을 만족하는 type alias를 연습삼아 간단히 만들어보십시오.
+// 1. 대충 이렇게 생긴 object 자료를 다룰 일이 많습니다. { name : 'kim', phone : 123, email : 'abc@naver.com' }
+// 2. object 안에 있는 이름, 전화번호, 이메일 속성이 옳은 타입인지 검사하는 type alias를 만들어봅시다.
+// 3. 각 속성이 어떤 타입일지는 자유롭게 정하십시오.
+type Q3 = {
+    name: string,
+    phone: number,
+    email: string
+}
+const q3: Q3 = { name : 'kim', phone : 123, email : 'abc@naver.com' }
+console.log(q3);
+
+// (숙제4). 다음을 만족하는 type alias를 만들어보십시오.
+// 1. 숙제2와 똑같은데 이번엔 이름, 전화번호, 이메일, 미성년자여부 속성을 옳은 타입인지 검사하는 type alias를 만들어봅시다.
+// 2. 미성년자 여부 속성은 true/false만 들어올 수 있습니다.
+// 3. 멋있게 숙제2에서 만들어둔  type alias를 재활용해봅시다.
+type Q4 = Q3 & {isAdult: boolean}
+const q4: Q4 = {
+    name: 'kim',
+    phone: 13111,
+    email: '134@242.44',
+    isAdult: true
+}
+console.log(q4);
