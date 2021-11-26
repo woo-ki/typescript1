@@ -1,28 +1,21 @@
-// null & undefined 체크 팁
-var func = function (a) {
-    if (a && typeof a === 'string') {
-        // a가 null 또는 undefined 일때는 if문 실행이 안됨 false 로 인식함 바로
-        // 익숙하지 않으면 안쓰는게 나음 ㅇㅇ
-    }
-    else {
-    }
-};
-func('a');
-var func2 = function (animal) {
-    if ('swim' in animal) {
-        console.log('물고기!');
-    }
-    else {
-        console.log('새!');
+// never타입을 함수에 사용하는 경우
+// return값이 없어야함
+// 함수가 끝나지 않아야함
+// 무한루프(while true) or 에러 던지기
+var func = function () {
+    // throw new Error();
+    while (true) {
     }
 };
-func2({ swim: 'aaa' });
-var func3 = function (x) {
-    if (x.wheel === '4개') {
-        console.log('차!');
+// 실제 사용하는 케이스 사실 없음
+// 거의 안 씀 void로 대체함
+// 이상하게 코드를 짜면 never가 튀어나와서 알아야함
+var func2 = function (param) {
+    if (typeof param === 'string') {
+        console.log(param);
     }
     else {
-        console.log('오토바이!');
+        // 존재할 수 없는 타입인데 만들어서 never가 나와버림
+        console.log(param);
     }
 };
-func3({ wheel: '4개', color: 'blue' });
